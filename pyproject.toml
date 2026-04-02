@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gg-diagram"
-version = "0.1.0"
+version = "0.2.0"
 description = "GG Diagram: vehicle dynamics acceleration heatmap visualization (lateral vs longitudinal)"
 readme = "README.md"
 license = "MIT"
@@ -25,7 +25,6 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -42,9 +41,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/roadsimulator3/gg-diagram"
+Homepage = "https://github.com/SebE585/gg-diagram"
 Documentation = "https://research.roadsimulator3.fr"
-Issues = "https://github.com/roadsimulator3/gg-diagram/issues"
+Issues = "https://github.com/SebE585/gg-diagram/issues"
 
 [tool.setuptools.packages.find]
 include = ["gg_diagram*"]
