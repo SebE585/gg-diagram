@@ -1,19 +1,12 @@
-# GG Diagram
+# gg-diagram
 
-**Vehicle dynamics acceleration heatmap visualization** -- plot lateral vs longitudinal acceleration (Gx vs Gy) as distance-weighted heatmaps.
+**Publication-quality GG diagrams for vehicle dynamics analysis.**
 
-Based on the GG diagram concept from Milliken & Milliken's *Race Car Vehicle Dynamics* (1995). The GG diagram is the standard way to visualize a vehicle's acceleration envelope and driving severity.
+Plot lateral vs longitudinal acceleration as distance-weighted heatmaps. Based on the GG diagram concept from Milliken & Milliken's *Race Car Vehicle Dynamics* (1995).
 
-Inspired by vehicle dynamics research at [RoadSimulator3](https://research.roadsimulator3.fr).
+![GG Diagram — Before/After IMU rectification on real driving data](hero.png)
 
-## Features
-
-- **Distance-weighted heatmaps** -- bins weighted by distance travelled, not just sample count
-- **Scatter plots** -- coloured by speed or any custom column
-- **Side-by-side comparison** -- compare before/after calibration or two different trips
-- **Auto unit detection** -- handles m/s^2, g, and milli-g inputs automatically
-- **Variable frequency support** -- auto-detects dt from timestamps
-- **Clean Plotly output** -- interactive, exportable figures
+*Real driving data (AEGIS dataset, 81 km, Graz, Austria). Left: raw IMU signal with gravity bias. Right: after in-field calibration -- the acceleration cloud is centered and aligned with the vehicle axes.*
 
 ## Installation
 
@@ -21,98 +14,100 @@ Inspired by vehicle dynamics research at [RoadSimulator3](https://research.roads
 pip install gg-diagram
 ```
 
-Or install from source:
-
-```bash
-git clone https://github.com/roadsimulator3/gg-diagram.git
-cd gg-diagram
-pip install -e .
-```
-
-## Quick start
+## Quick Start
 
 ```python
 import pandas as pd
-from gg_diagram import gg_heatmap, gg_scatter
+from gg_diagram import gg_heatmap
 
-# Load your telemetry data
-df = pd.read_csv("my_trip.csv")
+df = pd.read_parquet("my_driving_data.parquet")
 
-# Distance-weighted heatmap
-fig = gg_heatmap(df, ax_col="acc_x", ay_col="acc_y", speed_col="speed")
-fig.show()
-
-# Scatter plot coloured by speed
-fig = gg_scatter(df, ax_col="acc_x", ay_col="acc_y")
+fig = gg_heatmap(df, ax_col="ax_mps2", ay_col="ay_mps2", speed_col="speed_mps")
 fig.show()
 ```
 
-### Compare two trips
+## Features
+
+- **Distance-weighted heatmap** -- bins weighted by `speed * dt`, not sample count
+- **Log scale** -- reveals both high-density core and low-density tails
+- **Publication style** -- directional axis labels (Braking/Acceleration, Right/Left Turn), external contour, automotive colorscale
+- **Before/After comparison** -- `gg_compare()` with shared color axis
+- **Two modes** -- `mode="interactive"` (rich hover) or `mode="paper"` (compact for export)
+- **Auto unit detection** -- accepts m/s2, g, or mG
+- **Variable frequency** -- computes dt from timestamps (handles multi-rate datasets)
+
+## API
+
+### `gg_heatmap(df, ...)`
+
+Single GG diagram.
 
 ```python
-from gg_diagram import gg_compare
-
-fig = gg_compare(
-    df_before, df_after,
-    ax_col="acc_x", ay_col="acc_y",
-    title_before="Before calibration",
-    title_after="After calibration",
+fig = gg_heatmap(
+    df,
+    ax_col="ax_mps2",       # longitudinal acceleration column
+    ay_col="ay_mps2",       # lateral acceleration column
+    speed_col="speed_mps",  # speed in m/s (for distance weighting)
+    ts_col="ts",            # timestamp column (for variable dt)
+    hz=10.0,                # fallback frequency if no timestamps
+    title="My GG Diagram",
+    mode="interactive",     # or "paper"
+    output_html="gg.html",  # optional HTML export
 )
-fig.show()
 ```
-
-### Load data with auto-detected columns
-
-```python
-from gg_diagram import load_csv
-
-df, cols = load_csv("my_trip.csv")
-print(cols)  # {'ax_col': 'acc_x', 'ay_col': 'acc_y', 'speed_col': 'speed', 'ts_col': 'ts'}
-
-fig = gg_heatmap(df, **cols)
-fig.show()
-```
-
-## What is a GG diagram?
-
-A GG diagram plots longitudinal acceleration (braking/acceleration) against lateral acceleration (cornering). Each point represents an instantaneous acceleration state of the vehicle:
-
-- **Center** = cruising at constant speed on a straight road
-- **Left/Right** = cornering (lateral force)
-- **Top** = accelerating
-- **Bottom** = braking
-- **Corners** = combined manoeuvres (e.g. braking into a turn)
-
-Distance weighting ensures that high-speed sections (which cover more ground) are represented proportionally, giving a better picture of road severity than simple sample counts.
-
-## API reference
-
-### `gg_heatmap(df, ax_col, ay_col, speed_col=None, ...)`
-
-Create a distance-weighted 2D heatmap. Returns a Plotly `Figure`.
-
-Key parameters:
-- `distance_weighted` (bool, default True) -- weight by speed x dt
-- `range_mg` (float, default 1000) -- axis half-range in milli-g
-- `bin_size_mg` (float, default 20) -- bin width in milli-g
-- `unit` (str or None) -- force unit (`"mps2"`, `"g"`, `"mg"`), auto-detected if None
-
-### `gg_scatter(df, ax_col, ay_col, color_col=None, ...)`
-
-Create a scatter plot. Colour defaults to speed if available.
 
 ### `gg_compare(df_before, df_after, ...)`
 
-Side-by-side heatmap comparison. Returns a single Plotly figure with two subplots.
+Side-by-side comparison with shared color scale.
 
-### `load_csv(path, ...)` / `load_parquet(path, ...)`
+```python
+fig = gg_compare(
+    df_before, df_after,
+    title_before="Raw",
+    title_after="Calibrated",
+    main_title="IMU Rectification",
+    mode="paper",
+    output_html="compare.html",
+)
+```
 
-Load data and auto-detect column names. Returns `(DataFrame, column_dict)`.
+### `gg_scatter(df, ...)`
 
-## RS3 and RoadSimulator3
+Scatter plot with optional speed coloring.
 
-This package is part of the open-source tooling around [RS3](https://roadsimulator3.fr), a road surface simulation platform for vehicle dynamics research. Learn more at [research.roadsimulator3.fr](https://research.roadsimulator3.fr).
+```python
+fig = gg_scatter(df, color_col="speed_mps")
+```
+
+## Metrics
+
+Each figure exposes severity metrics via `fig._gg_meta`:
+
+```python
+fig._gg_meta["std_gx"]             # Std of longitudinal acceleration (g)
+fig._gg_meta["std_gy"]             # Std of lateral acceleration (g)
+fig._gg_meta["total_distance_km"]  # Total distance (km)
+```
+
+## Data Format
+
+The package expects a pandas DataFrame with at minimum:
+
+| Column | Unit | Description |
+|--------|------|-------------|
+| `ax_mps2` | m/s2 | Longitudinal acceleration |
+| `ay_mps2` | m/s2 | Lateral acceleration |
+| `speed_mps` | m/s | Vehicle speed (for distance weighting) |
+| `ts` | datetime | Timestamp (optional, for variable-rate data) |
+
+Column names are configurable via `ax_col`, `ay_col`, `speed_col`, `ts_col`.
+
+## Links
+
+- Research: [research.roadsimulator3.fr](https://research.roadsimulator3.fr)
+- Simulator: [simulate.roadsimulator3.fr](https://simulate.roadsimulator3.fr)
+- Author: Sebastien Edet
 
 ## License
 
-MIT -- see [LICENSE](LICENSE).
+MIT
