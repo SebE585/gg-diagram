@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gg-diagram"
+version = "0.1.0"
+description = "GG Diagram: vehicle dynamics acceleration heatmap visualization (lateral vs longitudinal)"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    { name = "RoadSimulator3 Research", email = "contact@roadsimulator3.fr" },
+]
+keywords = [
+    "vehicle-dynamics",
+    "gg-diagram",
+    "acceleration",
+    "heatmap",
+    "plotly",
+    "automotive",
+    "telemetry",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+dependencies = [
+    "numpy>=1.22",
+    "pandas>=1.4",
+    "plotly>=5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/roadsimulator3/gg-diagram"
+Documentation = "https://research.roadsimulator3.fr"
+Issues = "https://github.com/roadsimulator3/gg-diagram/issues"
+
+[tool.setuptools.packages.find]
+include = ["gg_diagram*"]
